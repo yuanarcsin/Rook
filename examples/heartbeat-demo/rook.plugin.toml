@@ -1,0 +1,25 @@
+# Rook 脚本插件清单示例（schema = 1）
+#
+# 把本文件放在脚本仓库根目录，Rook 的控制台 →「导入脚本」选择它即可。
+# 相对路径以本清单所在目录为基准；导入不会执行脚本，也不会读取任何密码。
+
+schema = 1
+
+[plugin]
+id = "heartbeat-demo"           # 导入后的任务 id；小写字母/数字/-/_，全局唯一
+name = "心跳示例"                # 展示名，导入后仍可在 UI 里改
+version = "1.0.0"               # 清单版本；升级后 UI 会提示「清单有更新」
+description = "每 2 秒写一次心跳，收到 CTRL_BREAK 时优雅退出的最小示例。"
+
+[run]
+command = "node"                # 裸名称走 PATH，也可写绝对路径
+args = ["agent.mjs"]
+working_dir = "."               # 相对本清单目录解析
+auto_start = false              # 安全默认：首次导入后手动启动
+
+[health]
+type = "heartbeat"              # 心跳文件由应用注入，清单里不需要写路径
+interval_ms = 3000
+max_age_ms = 10000
+startup_grace_ms = 8000
+needs_human_status = ["login_required", "blocked"]

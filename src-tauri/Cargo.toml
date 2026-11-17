@@ -1,0 +1,82 @@
+[package]
+name = "rook"
+version = "0.1.0"
+description = "Rook：本机脚本的常驻值守"
+authors = ["Rook"]
+edition = "2024"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "rook_lib"
+crate-type = ["rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+# 仅用于把 Common Controls v6 清单链接到集成测试二进制（见 build.rs）
+embed-resource = "3"
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-single-instance = "2.5.5"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# 配置：TOML 解析（toml_edit 用于"只改差异字段、保留注释"的结构化保存）
+toml = "0.8"
+# M4-4a：结构化任务草稿的格式保留编辑（见 config/task_draft.rs 与 spike-s6）
+toml_edit = "0.25"
+# M4-2：配置文本编辑器的内容 revision（SHA-256 前 16 字节 hex，见 spike-s6）
+sha2 = "0.10"
+thiserror = "2"
+# 核心日志：tracing 门面 + 订阅者（RUST_LOG/环境过滤）+ 非阻塞按天轮转写入
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-appender = "0.2"
+# 日志按天轮转/保留期需要本地日期
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+# 配置热重载：目录级文件监听（编辑器 tmp+rename 原子保存也能覆盖）；
+# 监听失败/网络盘由 config/watch.rs 回退 mtime+size 轮询。
+notify = "8.2.1"
+
+# Win32 进程启动/监督：直接调用 windows 0.62（与 Tauri 2 锁定同一 minor），
+# 不引入 win32job（覆盖缺口 + 额外 windows 0.61 依赖）。
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62", features = [
+    # 系统 Toast：WinRT（ToastNotificationManager/XmlDocument）与进程 AUMID。
+    "Data_Xml_Dom",
+    "Foundation",
+    "UI_Notifications",
+    "Win32_Foundation",
+    "Win32_Graphics_Dwm",
+    "Win32_Graphics_Gdi",
+    "Win32_NetworkManagement_IpHelper",
+    "Win32_Networking_WinSock",
+    "Win32_Security",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Console",
+    "Win32_System_JobObjects",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Pipes",
+    "Win32_System_Power",
+    "Win32_System_ProcessStatus",
+    "Win32_System_Registry",
+    "Win32_System_Threading",
+    "Win32_System_WinRT",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+[dev-dependencies]
+tempfile = "3"
+
+
+# Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true

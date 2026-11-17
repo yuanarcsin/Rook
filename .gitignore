@@ -1,0 +1,44 @@
+# 依赖
+node_modules/
+.pnpm-store/
+
+# 构建产物
+.svelte-kit/
+/build/
+/src-tauri/target/
+/src-tauri/gen/schemas/
+vite.config.*.timestamp-*
+
+# 打包产物
+/dist/
+/release/
+*.msi
+
+# 运行期数据与本机配置
+/runtime/
+/logs/
+.dev-data/
+src-tauri/.dev-data/
+*.log
+*.log.*
+Rook.toml
+CampusSentry.toml
+*.toml.bak
+
+# 临时输出
+_trash/
+.ui-check/
+perf-runs/
+soak-runs/
+e2e-runs/
+compat-runs/
+*.tmp
+
+# 环境变量 / 编辑器 / 操作系统
+.env
+.env.*
+!.env.example
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
